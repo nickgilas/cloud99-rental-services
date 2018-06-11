@@ -1,9 +1,9 @@
 package com.cloud99.rental.repo;
 
+import com.cloud99.rental.domain.security.User;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-
-import com.cloud99.rental.domain.User;
 
 @Repository
 public interface UserRepo extends MongoRepository<User, String> {

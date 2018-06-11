@@ -1,57 +1,85 @@
 package com.cloud99.rental.domain;
 
 import org.joda.time.DateTime;
+import org.springframework.data.annotation.Id;
 
-public abstract class Person implements MongoDocument {
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 
-    static enum Gender {
-	MALE, FEMALE
-    }
+public class Person implements MongoDocument<String> {
 
-    private Name name;
-    private Gender gender;
-    private Integer age;
-    private DateTime createDate;
-    private DateTime updateDate;
+	static enum Gender {
+		MALE, FEMALE
+	}
 
-    public Name getName() {
-	return name;
-    }
+	@Id
+	private String id;
 
-    public void setName(Name name) {
-	this.name = name;
-    }
+	@NotNull(message = "person.name.required")
+	private Name name;
 
-    public Gender getGender() {
-	return gender;
-    }
+	@Email(message = "person.email.required")
+	private String email;
 
-    public void setGender(Gender gender) {
-	this.gender = gender;
-    }
+	private Gender gender;
 
-    public Integer getAge() {
-	return age;
-    }
+	private Integer age;
 
-    public void setAge(Integer age) {
-	this.age = age;
-    }
 
-    public DateTime getCreateDate() {
-	return createDate;
-    }
+	private DateTime createDate;
+	private DateTime updateDate;
 
-    public void setCreateDate(DateTime createDate) {
-	this.createDate = createDate;
-    }
+	@Override
+	public String getId() {
+		return id;
+	}
 
-    public DateTime getUpdateDate() {
-	return updateDate;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setUpdateDate(DateTime updateDate) {
-	this.updateDate = updateDate;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public Name getName() {
+		return name;
+	}
+
+	public void setName(Name name) {
+		this.name = name;
+	}
+
+	public Gender getGender() {
+		return gender;
+	}
+
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
+
+	public Integer getAge() {
+		return age;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
+	}
+
+	public DateTime getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(DateTime createDate) {
+		this.createDate = createDate;
+	}
+
+	public DateTime getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(DateTime updateDate) {
+		this.updateDate = updateDate;
+	}
 
 }

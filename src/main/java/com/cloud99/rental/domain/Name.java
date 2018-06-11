@@ -1,33 +1,68 @@
 package com.cloud99.rental.domain;
 
-public class Name implements MongoDocument {
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-    private String firstName;
-    private String lastName;
-    private String middleName;
+import javax.validation.constraints.NotNull;
 
-    public String getFirstName() {
-	return firstName;
-    }
+public class Name {
 
-    public void setFirstName(String firstName) {
-	this.firstName = firstName;
-    }
+	@NotNull(message = "name.first.required")
+	private String firstName;
 
-    public String getLastName() {
-	return lastName;
-    }
+	@NotNull(message = "name.last.required")
+	private String lastName;
 
-    public void setLastName(String lastName) {
-	this.lastName = lastName;
-    }
+	private String middleName;
 
-    public String getMiddleName() {
-	return middleName;
-    }
+	public String getFirstName() {
+		return firstName;
+	}
 
-    public void setMiddleName(String middleName) {
-	this.middleName = middleName;
-    }
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getMiddleName() {
+		return middleName;
+	}
+
+	public void setMiddleName(String middleName) {
+		this.middleName = middleName;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(getFirstName()).append(getLastName()).append(getMiddleName()).toHashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		if (obj.getClass() != getClass()) {
+			return false;
+		}
+		Name rhs = (Name) obj;
+		return new EqualsBuilder()
+				.appendSuper(super.equals(obj))
+				.append(getFirstName(), rhs.getFirstName())
+				.append(getLastName(), rhs.getLastName())
+				.append(getMiddleName(), rhs.getMiddleName()).
+				isEquals();
+	}
+
 
 }
