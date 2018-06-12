@@ -3,9 +3,12 @@ package com.cloud99.rental.repo;
 import com.cloud99.rental.domain.security.User;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepo extends MongoRepository<User, String> {
+
+	User findByEmail(@Param("email") String email);
 
 }

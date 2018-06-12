@@ -39,7 +39,7 @@ public class DataCreator {
 		features = createFeatures();
 		user = createUser();
 
-		user = userService.create(user);
+		user = userService.create(user, null);
 		account.addUserFeatureAccess(user.getId(), features);
 		acctService.update(account);
 
@@ -53,7 +53,7 @@ public class DataCreator {
 		user.setPerson(createNewPerson("Nick", "nickgilas@gmail.com"));
 		user.setPassword("password");
 		user.setEnabled(true);
-		return userService.create(user);
+		return userService.create(user, null);
 	}
 
 	private Person createNewPerson(String name, String email) {

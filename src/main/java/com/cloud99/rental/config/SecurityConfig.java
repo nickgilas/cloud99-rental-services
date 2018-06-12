@@ -1,5 +1,7 @@
 package com.cloud99.rental.config;
 
+import com.cloud99.rental.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -13,6 +15,9 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
     
+	@Autowired
+	private UserService userService;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 	http
@@ -33,7 +38,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         return new InMemoryUserDetailsManager(user);
     }
     
-    @Autowired
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userService);
+	}
+
+	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth
 			.inMemoryAuthentication()
