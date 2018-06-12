@@ -1,5 +1,6 @@
 package com.cloud99.rental.domain.security;
 
+import com.cloud99.rental.config.security.SecurityRole;
 import com.cloud99.rental.domain.Person;
 import com.cloud99.rental.validation.PasswordMatches;
 
@@ -10,10 +11,13 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Currency;
 
 @PasswordMatches
-public class User extends AbstractSecurityResource {
+public class User extends AbstractSecurityResource implements Principal {
 
 	@Id
 	private String id;
@@ -36,10 +40,21 @@ public class User extends AbstractSecurityResource {
 
 	private boolean enabled;
 
+	private Collection<SecurityRole> securityRoles;
+
 	private Currency currency;
 
 	public User() {
 		this.enabled = false;
+		securityRoles = new ArrayList<>(1);
+	}
+
+	public Collection<SecurityRole> getSecurityRoles() {
+		return securityRoles;
+	}
+
+	public void setSecurityRoles(Collection<SecurityRole> securityRoles) {
+		this.securityRoles = securityRoles;
 	}
 
 	public boolean isEnabled() {
@@ -96,6 +111,16 @@ public class User extends AbstractSecurityResource {
 
 	public String getMatchingPassword() {
 		return matchingPassword;
+	}
+
+	public void addSecurityRole(SecurityRole role) {
+		this.securityRoles.add(role);
+
+	}
+
+	@Override
+	public String getName() {
+		return getPerson().getEmail();
 	}
 
 }

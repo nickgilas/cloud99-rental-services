@@ -1,5 +1,6 @@
 package com.cloud99.rental.dataCreation;
 
+import com.cloud99.rental.config.security.SecurityRole;
 import com.cloud99.rental.domain.Name;
 import com.cloud99.rental.domain.Person;
 import com.cloud99.rental.domain.account.Account;
@@ -9,6 +10,7 @@ import com.cloud99.rental.domain.security.User;
 import com.cloud99.rental.service.AccountService;
 import com.cloud99.rental.service.FeatureService;
 import com.cloud99.rental.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
@@ -34,7 +36,10 @@ public class DataCreator {
 	@Autowired
 	private FeatureService featureService;
 
-	public Account execute() {
+	@Autowired
+	private ObjectMapper objMapper;
+
+	public Account execute() throws Exception {
 		account = createAccount("Nicks 12345 Account");
 		features = createFeatures();
 		user = createUser();
@@ -43,7 +48,12 @@ public class DataCreator {
 		account.addUserFeatureAccess(user.getId(), features);
 		acctService.update(account);
 
+		printJson(user);
 		return account;
+	}
+
+	private void printJson(Object user) throws Exception {
+		objMapper.writeValueAsString(user);
 	}
 
 	private User createUser() {
@@ -53,6 +63,7 @@ public class DataCreator {
 		user.setPerson(createNewPerson("Nick", "nickgilas@gmail.com"));
 		user.setPassword("password");
 		user.setEnabled(true);
+		user.addSecurityRole(SecurityRole.ADMIN);
 		return userService.create(user, null);
 	}
 

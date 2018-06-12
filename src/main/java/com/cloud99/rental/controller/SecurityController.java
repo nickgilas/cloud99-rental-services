@@ -31,7 +31,7 @@ public class SecurityController {
 
 	@GetMapping("/loadTestData")
 	@ResponseBody
-	public Account test(@RequestParam String name) {
+	public Account test(@RequestParam String name) throws Exception {
 		Account acct = dataCreator.execute();
 		return acct;
 	}

@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.UUID;
 
 @Document
-public class VerificationToken {
+public class AuthenticatedUserToken {
 	private static final int EXPIRATION = 60 * 24;
 
 	@Id
@@ -21,7 +21,7 @@ public class VerificationToken {
 
 	private final LocalDateTime expiryDate;
 
-	public VerificationToken(User user) {
+	public AuthenticatedUserToken(User user) {
 		expiryDate = LocalDateTime.now().minusMinutes(EXPIRATION);
 		token = UUID.randomUUID().toString();
 		this.user = user;

@@ -1,11 +1,16 @@
 package com.cloud99.rental.service;
 
+import com.cloud99.rental.config.security.SecurityRole;
 import com.cloud99.rental.domain.security.User;
 import com.cloud99.rental.repo.UserRepo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements RentalService, UserDetailsService {
+public class UserService implements RentalService, UserDetailsService, AuthenticationProvider {
 
 	@Autowired
 	private UserRepo userRepo;
@@ -33,27 +39,47 @@ public class UserService implements RentalService, UserDetailsService {
 	@Autowired
 	private MessageSource messages;
 
-	@Autowired
-	private JavaMailSender mailSender;
+	// @Autowired
+	// private JavaMailSender mailSender;
 
 	// http://www.baeldung.com/registration-verify-user-by-email
 
 	@Transactional
 //	@Override
-	public User create(User document, HttpServletRequest request) {
+	public User create(User user, HttpServletRequest request) {
 
-		if (emailExist(document.getPerson().getEmail())) {
+		if (emailExist(user.getPerson().getEmail())) {
 			throw new ServiceException("email.exists");
 		}
 		// encode password
-		document.setPassword(BCrypt.hashpw(document.getPassword(), BCrypt.gensalt()));
-
-		String appUrl = request.getContextPath();
-		eventPublisher.publishEvent(new OnRegistrationCompleteEvent(document, request.getLocale(), appUrl));
+		user.setPassword(BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+		user.addSecurityRole(SecurityRole.USER);
 		
-		return userRepo.save(document);
+		// TODO - NG - finish implementing event notification for new user created (to generate account validation email)
+		String appUrl = request.getContextPath();
+		// eventPublisher.publishEvent(new OnRegistrationCompleteEvent(document,
+		// request.getLocale(), appUrl));
+		
+		return userRepo.save(user);
 
 		// TODO - NG - decrypt password - BCrypt.checkpw
+	}
+
+	@Override
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+
+		String name = authentication.getName();
+		String password = authentication.getCredentials().toString();
+
+		UserDetails user = loadUserByUsername(name);
+
+		return new UsernamePasswordAuthenticationToken(name, password, user.getAuthorities());
+	}
+
+	@Override
+	public boolean supports(Class<?> authentication) {
+		return authentication.equals(UsernamePasswordAuthenticationToken.class);
+
 	}
 
 	private boolean emailExist(String email) {
@@ -88,15 +114,14 @@ public class UserService implements RentalService, UserDetailsService {
 			throw new ServiceException("user.not.found");
 		}
 
-		// TODO - incorporate Roles/Authorieies
-		// getAuthorities(user.getRoles);
-		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), null);
+		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
+				convertSecurityRoleToGrantedAuthorities(user.getSecurityRoles()));
 	}
 
-	private static List<GrantedAuthority> getAuthorities(List<String> roles) {
+	private static List<GrantedAuthority> convertSecurityRoleToGrantedAuthorities(Collection<SecurityRole> roles) {
 		List<GrantedAuthority> authorities = new ArrayList<>();
-		for (String role : roles) {
-			authorities.add(new SimpleGrantedAuthority(role));
+		for (SecurityRole role : roles) {
+			authorities.add(new SimpleGrantedAuthority(role.name()));
 		}
 		return authorities;
 	}
