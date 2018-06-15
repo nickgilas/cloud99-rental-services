@@ -14,9 +14,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.ClientRegistrationException;
+import org.springframework.security.oauth2.provider.client.BaseClientDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserService implements RentalService, UserDetailsService, AuthenticationProvider {
+public class UserService implements RentalService, ClientDetailsService, AuthenticationProvider {
 
 	@Autowired
 	private UserRepo userRepo;
@@ -61,19 +64,24 @@ public class UserService implements RentalService, UserDetailsService, Authentic
 		// request.getLocale(), appUrl));
 		
 		return userRepo.save(user);
-
-		// TODO - NG - decrypt password - BCrypt.checkpw
 	}
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-		String name = authentication.getName();
 		String password = authentication.getCredentials().toString();
 
-		UserDetails user = loadUserByUsername(name);
+		Optional<User> optinalUser = read(authentication.getName());
+		if (optinalUser.isPresent()) {
+			User user = optinalUser.get();
+			if (BCrypt.checkpw(password, user.getPassword())) {
+				return new UsernamePasswordAuthenticationToken(user, password,
+						convertSecurityRoleToGrantedAuthorities(user.getSecurityRoles()));
+			}
+		}
 
-		return new UsernamePasswordAuthenticationToken(name, password, user.getAuthorities());
+		return null;
+
 	}
 
 	@Override
@@ -106,24 +114,32 @@ public class UserService implements RentalService, UserDetailsService, Authentic
 		userRepo.delete(document);
 	}
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-		User user = userRepo.findByEmail(username);
-		if (user == null) {
-			throw new ServiceException("user.not.found");
-		}
-
-		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
-				convertSecurityRoleToGrantedAuthorities(user.getSecurityRoles()));
-	}
-
 	private static List<GrantedAuthority> convertSecurityRoleToGrantedAuthorities(Collection<SecurityRole> roles) {
 		List<GrantedAuthority> authorities = new ArrayList<>();
 		for (SecurityRole role : roles) {
 			authorities.add(new SimpleGrantedAuthority(role.name()));
 		}
 		return authorities;
+	}
+
+	private static String convertSecurityRoleToString(Collection<SecurityRole> roles) {
+		StringBuilder list = new StringBuilder();
+		roles.stream().forEach(role -> {
+			list.append(role + ",");
+		});
+		return list.toString().substring(0, list.length() - 1);
+
+	}
+	@Override
+	public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
+		
+		User user = userRepo.findByEmail(clientId);
+		if (user == null) {
+			throw new ServiceException("user.not.found");
+		}
+		
+		return new BaseClientDetails(user.getEmail(), "", "", "", convertSecurityRoleToString(user.getSecurityRoles()));
+
 	}
 
 }

@@ -6,16 +6,13 @@ import com.cloud99.rental.domain.security.User;
 import com.cloud99.rental.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -35,15 +32,9 @@ public class SecurityController {
 		Account acct = dataCreator.execute();
 		return acct;
 	}
-
-	@GetMapping(value = "/user/registration")
-	public String showRegistrationForm(WebRequest request, Model model) {
-		model.addAttribute("user", userService);
-		return "registration";
-	}
 	
 	@PostMapping("/user/registration")
-	public User registerUserAccount(@ModelAttribute("user") @Valid User user, BindingResult result,
+	public User registerUserAccount(@Valid User user, BindingResult result,
 			HttpServletRequest request,
 			Errors errors) {
 		

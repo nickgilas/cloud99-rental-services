@@ -39,12 +39,19 @@ public class DataCreator {
 	@Autowired
 	private ObjectMapper objMapper;
 
+	public static void main(String[] args) {
+		ObjectMapper m = new ObjectMapper();
+		DataCreator c = new DataCreator();
+	}
 	public Account execute() throws Exception {
-		account = createAccount("Nicks 12345 Account");
-		features = createFeatures();
-		user = createUser();
 
-		user = userService.create(user, null);
+		account = acctService.create(createAccount("Nicks 12345 Account"));
+
+		features = createFeatures();
+		features.stream().forEach(f -> featureService.create(f));
+
+		user = userService.create(createUser(), null);
+
 		account.addUserFeatureAccess(user.getId(), features);
 		acctService.update(account);
 
@@ -52,11 +59,11 @@ public class DataCreator {
 		return account;
 	}
 
-	private void printJson(Object user) throws Exception {
+	public void printJson(Object user) throws Exception {
 		objMapper.writeValueAsString(user);
 	}
 
-	private User createUser() {
+	public User createUser() {
 		User user = new User();
 
 		user.setEmail("nickgilas@gmail.com");
@@ -64,10 +71,10 @@ public class DataCreator {
 		user.setPassword("password");
 		user.setEnabled(true);
 		user.addSecurityRole(SecurityRole.ADMIN);
-		return userService.create(user, null);
+		return user;
 	}
 
-	private Person createNewPerson(String name, String email) {
+	public Person createNewPerson(String name, String email) {
 		Person person = new Person();
 		person.setAge(40);
 		person.setEmail(email);
@@ -91,12 +98,12 @@ public class DataCreator {
 				createFeature("Storage", "Document storage"));
 	}
 
-	private Feature createFeature(String name, String desc) {
+	public Feature createFeature(String name, String desc) {
 		Feature feature = new Feature();
 		feature.setEnabledDate(LocalDateTime.now());
 		feature.setName(name);
 		feature.setDescription(desc);
-		return featureService.create(feature);
+		return feature;
 	}
 
 
