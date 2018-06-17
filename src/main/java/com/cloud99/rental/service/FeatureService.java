@@ -1,7 +1,7 @@
 package com.cloud99.rental.service;
 
-import com.cloud99.rental.domain.account.Feature;
-import com.cloud99.rental.repo.FeatureRepo;
+import com.cloud99.rental.domain.document.account.Feature;
+import com.cloud99.rental.repo.document.FeatureRepo;
 
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;

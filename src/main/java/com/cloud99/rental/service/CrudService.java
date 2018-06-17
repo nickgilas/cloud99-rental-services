@@ -1,6 +1,6 @@
 package com.cloud99.rental.service;
 
-import com.cloud99.rental.domain.MongoDocument;
+import com.cloud99.rental.domain.document.MongoDocument;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;

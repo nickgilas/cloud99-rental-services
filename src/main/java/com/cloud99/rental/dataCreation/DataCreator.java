@@ -1,12 +1,13 @@
 package com.cloud99.rental.dataCreation;
 
 import com.cloud99.rental.config.security.SecurityRole;
-import com.cloud99.rental.domain.Name;
-import com.cloud99.rental.domain.Person;
-import com.cloud99.rental.domain.account.Account;
-import com.cloud99.rental.domain.account.Feature;
-import com.cloud99.rental.domain.account.Subscription;
-import com.cloud99.rental.domain.security.User;
+import com.cloud99.rental.domain.document.Name;
+import com.cloud99.rental.domain.document.Person;
+import com.cloud99.rental.domain.document.account.Account;
+import com.cloud99.rental.domain.document.account.Feature;
+import com.cloud99.rental.domain.document.account.Subscription;
+import com.cloud99.rental.domain.document.security.SecurityAccess.Access;
+import com.cloud99.rental.domain.document.security.User;
 import com.cloud99.rental.service.AccountService;
 import com.cloud99.rental.service.FeatureService;
 import com.cloud99.rental.service.UserService;
@@ -18,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import de.flapdoodle.embed.process.collections.Collections;
 
 @Component
 public class DataCreator {
@@ -107,8 +111,8 @@ public class DataCreator {
 	}
 
 
-	public void createSecurity() {
-
+	public Collection<Access> createSecurityAccess() {
+		return Collections.newArrayList(Access.READ, Access.UPDATE);
 	}
 
 	private Account createAccount(String name) {

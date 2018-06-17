@@ -1,6 +1,13 @@
 package com.cloud99.rental.config.security;
 
-public enum SecurityRole {
+import org.springframework.security.core.GrantedAuthority;
 
-	USER, ADMIN
+public enum SecurityRole implements GrantedAuthority {
+
+	USER, ADMIN;
+
+	@Override
+	public String getAuthority() {
+		return this.name();
+	}
 }

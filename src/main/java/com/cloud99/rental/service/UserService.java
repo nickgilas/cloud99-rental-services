@@ -1,8 +1,9 @@
 package com.cloud99.rental.service;
 
 import com.cloud99.rental.config.security.SecurityRole;
-import com.cloud99.rental.domain.security.User;
-import com.cloud99.rental.repo.UserRepo;
+import com.cloud99.rental.domain.document.security.SecuredUser;
+import com.cloud99.rental.domain.document.security.User;
+import com.cloud99.rental.repo.document.UserRepo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -11,10 +12,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -25,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -72,11 +67,13 @@ public class UserService implements RentalService, ClientDetailsService, Authent
 		String password = authentication.getCredentials().toString();
 
 		Optional<User> optinalUser = read(authentication.getName());
+
 		if (optinalUser.isPresent()) {
 			User user = optinalUser.get();
+			SecuredUser secureUser = new SecuredUser(user, null, user.getSecurityRoles(), true);
+
 			if (BCrypt.checkpw(password, user.getPassword())) {
-				return new UsernamePasswordAuthenticationToken(user, password,
-						convertSecurityRoleToGrantedAuthorities(user.getSecurityRoles()));
+				return new UsernamePasswordAuthenticationToken(user, password, secureUser.getAuthorities());
 			}
 		}
 
@@ -114,15 +111,7 @@ public class UserService implements RentalService, ClientDetailsService, Authent
 		userRepo.delete(document);
 	}
 
-	private static List<GrantedAuthority> convertSecurityRoleToGrantedAuthorities(Collection<SecurityRole> roles) {
-		List<GrantedAuthority> authorities = new ArrayList<>();
-		for (SecurityRole role : roles) {
-			authorities.add(new SimpleGrantedAuthority(role.name()));
-		}
-		return authorities;
-	}
-
-	private static String convertSecurityRoleToString(Collection<SecurityRole> roles) {
+	private String convertSecurityRoleToString(Collection<SecurityRole> roles) {
 		StringBuilder list = new StringBuilder();
 		roles.stream().forEach(role -> {
 			list.append(role + ",");

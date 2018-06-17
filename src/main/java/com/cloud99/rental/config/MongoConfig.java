@@ -8,7 +8,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-@EnableMongoRepositories(basePackages = "com.cloud99.rental.repo")
+@EnableMongoRepositories(basePackages = { "com.cloud99.rental.repo.document", "com.cloud99.rental.domain.document",
+		"com.cloud99.rental.service" })
 @Configuration
 @PropertySource("classpath:application.properties")
 public class MongoConfig extends AbstractMongoConfiguration {

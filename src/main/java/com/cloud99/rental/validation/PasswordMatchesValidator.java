@@ -1,6 +1,6 @@
 package com.cloud99.rental.validation;
 
-import com.cloud99.rental.domain.security.User;
+import com.cloud99.rental.domain.document.security.User;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
